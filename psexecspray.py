@@ -62,6 +62,7 @@ else:
     for ip in file:
         targetipseperated.append(ip.strip("\n"))
 
+
 if not args.username:
     targetusername = raw_input("[*] Enter Username: ")
 else:
@@ -85,7 +86,7 @@ for ip in targetipseperated:
         try:
             smb.login(user=targetusername, password=targetpassword,
                       domain=targetdomain, lmhash=targetlm, nthash=targetnt)
-            print t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.norma
+            print t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.normal
             workinghashes.append(hash + "," + ip)
         except:
             print t.bold_red + "[!] This Hash Failed" + t.normal
