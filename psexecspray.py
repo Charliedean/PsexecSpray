@@ -108,7 +108,7 @@ if want_to_psexec.lower() == "y" or want_to_psexec == "":
         try:
             PSEXEC.run(psexecip)
         except SessionError:
-            print t.bold_red + "[*] Failed to Remove Payload, Remove Manually with Shell"
+            print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
 else:
     print t.bold_green + "[*] Done." + t.normal
     sys.exit(0)
