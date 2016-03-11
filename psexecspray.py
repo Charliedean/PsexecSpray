@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(description='Spray Smb Hashes and Psexec')
 parser.add_argument("-hashfile", help="Parse Hashes from a File (Hashes Seperated by New Line)")
 parser.add_argument("-ipfile", help="Parse IP's from a File (IP's Seperated by New Line)")
 parser.add_argument("-username", help="Set Username")
-parser.add_argument("-workgroup", help="Set WorkGroup")
+parser.add_argument("-domain", help="Set Domain")
 parser.add_argument("payloadpath", help="Select Payload for Psexec")
 args = parser.parse_args()
 
@@ -67,10 +67,10 @@ if not args.username:
     targetusername = raw_input("[*] Enter Username: ")
 else:
     targetusername = args.username
-if not args.workgroup:
+if not args.domain:
     targetdomain = raw_input("[*] Enter Domain: ")
 else:
-    targetdomain = args.workgroup
+    targetdomain = args.domain
 
 for ip in targetipseperated:
     for hash in targetsprayhash:
