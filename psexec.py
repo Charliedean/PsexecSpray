@@ -201,10 +201,10 @@ class PSEXEC:
             raise
         except:
             if unInstalled is False:
+                print "[*] Sleeping While MeterPreter Migrates"
+                time.sleep(10)
                 installService.uninstall()
                 if self.__copyFile is not None:
-                    print "[*] Sleeping While MeterPreter Migrates"
-                    time.sleep(10)
                     s.deleteFile(installService.getShare(), os.path.basename(self.__copyFile))
             sys.stdout.flush()
             sys.exit(1)

