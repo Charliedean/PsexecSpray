@@ -28,6 +28,7 @@ def StartPsexec(exeFile,targetusername,psexechash,targetdomain,psexecip):
                            hashes=psexechash, domain=targetdomain, password=None, aesKey=None, doKerberos=False)
     print t.bold_green + "\n[*] Starting Psexec...." + t.normal
     try:
+        time.sleep(7)
         PSEXEC.run(psexecip)
     except SessionError:
         print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
