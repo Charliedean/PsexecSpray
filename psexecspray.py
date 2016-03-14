@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#1.2
 import psexec
 import time
 import blessings
