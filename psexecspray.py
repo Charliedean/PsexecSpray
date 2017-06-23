@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import psexec
 import time
-import blessings
+import blessed
 import sys
 import re
 import argparse
