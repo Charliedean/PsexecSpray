@@ -26,7 +26,7 @@ class timeout:
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
 
-t = blessings.Terminal()
+t = blessed.Terminal()
 
 
 def StartPsexec(exeFile, targetusername, psexechash, targetdomain, psexecip):
